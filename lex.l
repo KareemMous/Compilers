@@ -34,7 +34,6 @@
 "%"												          return REM;
 "%="													  return REMEQUAL;
 
-
 ;                       						return SEMICOLON;
 :                       						return COLON; 
 ,                       						return COMMA;

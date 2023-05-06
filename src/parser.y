@@ -152,6 +152,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON
 	|   FUNCTIONS
 	| 	Function_Calls SEMICOLON  // f1();
 	| 	Switch_Case
+	|	Enum_Declaration
 	;
 
 Enum_Declaration: ENUM IDENTIFIER OCBRACKET ENUM_LIST CCBRACKET SEMICOLON

@@ -1,12 +1,19 @@
 int main(){
 
-    tmp = 6;
-    tmp = 7
+    
     int x; 
     int y = 10 ;
     f2();
     x = f3();
     
+
+    enum season 
+    {   
+    spring = 0,
+    summer = 4, 
+    autumn = 8,
+    winter = 12
+    };
     
 
     bool z = True;

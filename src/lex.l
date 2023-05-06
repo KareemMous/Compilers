@@ -3,7 +3,7 @@
 	#include <stdlib.h>
 	#include <stdio.h>
 	#include <string.h>
-	#include "yacc.tab.h"
+	#include "parser.tab.h"
 %}
 
 %%

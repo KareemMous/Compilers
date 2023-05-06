@@ -62,7 +62,7 @@
 	%token <floatValue> FLOAT
 	%token <boolValue> BOOL
 	%token <stringValue> STRING
-	%token <variableName> ENUM
+	%token ENUM
 	%token CONST
 	%token VOID
 

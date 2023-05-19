@@ -1,3 +1,9 @@
+bool f3( int x ){
+    bool x = True;
+    return x;
+}
+
+
 int main(){
 
     
@@ -5,11 +11,13 @@ int main(){
     int y = 10 ;
     f2();
     x = f3();
+
+    
     
 
     enum season 
     {   
-    spring = 0,
+    spring = 0, 
     summer = 4, 
     autumn = 8,
     winter = 12
@@ -24,6 +32,8 @@ int main(){
 
     if(z == True){
         z = False;
+    }else{
+        z = True;
     }
 
     
@@ -84,3 +94,5 @@ int main(){
     
     return 0 ; 
 }
+
+    

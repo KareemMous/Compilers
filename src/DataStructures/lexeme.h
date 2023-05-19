@@ -6,7 +6,7 @@
 
 struct lexemeInfo
 {
-    char *name;
+    char *variableName;
     DataType dataType;
     int intValue;
     float floatValue;

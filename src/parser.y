@@ -62,7 +62,6 @@
 	%token <floatValue> FLOAT
 	%token <boolValue> BOOL
 	%token <stringValue> STRING
-	%token ENUM
 	%token CONST
 	%token VOID
 
@@ -106,10 +105,10 @@
 	#include <stdlib.h>   
 	#include <string.h>
 	#include <math.h>
-	#include "Data Structures/scope.h"
-	#include "Data Structures/quadruple.h"
-	#include "Utils/typeConversion.h"
-	#include "Utils/compute.h"
+	#include "DataStructures/scope.h"
+	#include "DataStructures/quadruple.h"
+	#include "DataStructures/typeConversion.h"
+	#include "DataStructures/conversions.h"
 
 
 	int yyerror(char *);
@@ -242,19 +241,8 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 	|   FUNCTIONS
 	| 	Function_Calls SEMICOLON
 	| 	Switch_Case
-	|	Enum_Declaration
 	;
 
-Enum_Declaration: ENUM IDENTIFIER OCBRACKET ENUM_LIST CCBRACKET SEMICOLON
-			| ENUM IDENTIFIER SEMICOLON
-			;
-
-ENUM_LIST:
-		ENUM_LIST COMMA IDENTIFIER
-		| ENUM_LIST COMMA IDENTIFIER ASSIGN EXPRESSION
-		| IDENTIFIER
-		| IDENTIFIER ASSIGN EXPRESSION
-		;
 
 EXPRESSION: Number_Declaration {$$ =$1;}
 		| 	Boolean_Expression {$$ =$1;}
@@ -460,7 +448,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 													yyerror_with_variable("Invalid Operation on strings",$1);
 												}else{
 													// push in quadraples 1 x x +
-													push(quad_stack,"1",NULL,quadraplesFile);push(quad_stack,current_identifier->variable_name,NULL,quadraplesFile);push(quad_stack,"+",current_identifier->variable_name,quadraplesFile);
+													push(quad_stack,"1",NULL,quadraplesFile);push(quad_stack,current_identifier->name,NULL,quadraplesFile);push(quad_stack,"+",current_identifier->name,quadraplesFile);
 												}
 											}
 				|   	IDENTIFIER DECREMENT {	current_identifier = variable_found_in_scope(current_scope,$1);
@@ -617,7 +605,7 @@ Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 									success = 0;
 							}
 							if(success == 1){
-								set_variable_used_in_scope(current_scope, current_identifier->variable_name);
+								set_variable_used_in_scope(current_scope, current_identifier->name);
 								set_lexeme(&$$,current_identifier->my_datatype);
 								$$->variableName = $1;
 							}else{

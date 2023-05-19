@@ -10,28 +10,28 @@ typedef enum
 
 typedef enum
 {
-    BOOL,
-    CONST_BOOL,
-    CHAR,
-    CONST_CHAR,
-    INT,
-    CONST_INT,
-    FLOAT,
-    CONST_FLOAT,
-    STRING,
-    CONST_STRING,
+    BOOL_DT,
+    CONST_BOOL_DT,
+    CHAR_DT,
+    CONST_CHAR_DT,
+    INT_DT,
+    CONST_INT_DT,
+    FLOAT_DT,
+    CONST_FLOAT_DT,
+    STRING_DT,
+    CONST_STRING_DT,
     VOID
 } DataType;
 
 typedef enum
 {
-    PLUS,
-    MINUS,
-    TIMES,
-    DIVIDE,
-    MOD,
-    POWER,
-    UMINUS
+    PLUS_OP,
+    MINUS_OP,
+    TIMES_OP,
+    DIVIDE_OP,
+    MOD_OP,
+    POWER_OP,
+    UMINUS_OP
 } Operator;
 
 typedef enum
@@ -63,7 +63,11 @@ typedef enum
     SYNTAX_ERROR,
     SEMANTIC_ERROR,
     RUNTIME_ERROR,
-    NOT_SUPPORTED
+    CONSTANT_NOT_INITIALIZED,
+    STRING_INVALID_OPERATION,
+    CONSTANT_REASSIGNMENT,
+    OPERATION_NOT_SUPPORTED,
+    DIVISION_BY_ZERO_ERROR
 } ReturnCode;
 
 #endif

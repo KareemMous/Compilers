@@ -13,7 +13,7 @@ struct variableEntry
     DataType *parameterTypes;
     int parameterCount;
 
-    int initialized;
+    int is_initialized;
     int used;
 
     UT_hash_handle hh;
@@ -27,7 +27,7 @@ struct variableEntry *copy_variable(struct variableEntry *oldVariable)
     newVariable->dataType = oldVariable->dataType;
     newVariable->parameterTypes = oldVariable->parameterTypes;
     newVariable->parameterCount = oldVariable->parameterCount;
-    newVariable->initialized = oldVariable->initialized;
+    newVariable->is_initialized = oldVariable->is_initialized;
     newVariable->used = oldVariable->used;
     return newVariable;
 }

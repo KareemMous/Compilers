@@ -60,7 +60,7 @@ ReturnCode add_variable_to_scope(struct scope *scope, char *name, Type type, Dat
     variable->dataType = dataType;
     variable->parameterTypes = parameterTypes;
     variable->parameterCount = parameterCount;
-    variable->initialized = initialized;
+    variable->is_initialized = initialized;
     variable->used = 0;
     return add_variable_to_symbol_table(&scope->symbolTable, variable);
 }
@@ -108,7 +108,7 @@ ReturnCode assign_variable_in_scope(struct scope *scope, char *variableName)
         }
         parent = getParent(parent);
     }
-    return SYNTAX_ERROR;
+    return FAILURE;
 }
 void delete_all_variables_in_scope(struct scope *scope)
 {

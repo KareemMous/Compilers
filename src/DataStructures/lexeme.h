@@ -14,14 +14,21 @@ struct lexemeInfo
     char *stringValue;
     int boolValue;
 
-    int initialized;
+    int is_initialized;
 };
 
 void set_lexeme(struct lexemeInfo **input_lexeme, DataType type)
 {
     (*input_lexeme) = (struct lexemeInfo *)malloc(sizeof(struct lexemeInfo));
     (*input_lexeme)->dataType = type;
-    (*input_lexeme)->initialized = 1;
+    (*input_lexeme)->is_initialized = 1;
 }
+
+struct argument_info
+{
+    DataType my_type;
+    char *my_name;
+    struct argument_info *next_arg; // points to next arguments in linked list
+};
 
 #endif

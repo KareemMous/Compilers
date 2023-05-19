@@ -14,7 +14,7 @@ ReturnCode check_sides(DataType type1, DataType type2)
 OperationsToDo sides_implicit_conversion(DataType rhs, DataType lhs)
 {
 
-    if ((rhs == STRING || rhs == CONST_STRING) && (lhs != STRING && lhs != CONST_STRING) || (lhs == STRING || lhs == CONST_STRING) && (rhs != STRING && rhs != CONST_STRING))
+    if ((rhs == STRING_DT || rhs == CONST_STRING_DT) && (lhs != STRING_DT && lhs != CONST_STRING_DT) || (lhs == STRING_DT || lhs == CONST_STRING_DT) && (rhs != STRING_DT && rhs != CONST_STRING_DT))
     {
         return ERROR;
     }

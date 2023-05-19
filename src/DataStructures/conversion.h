@@ -15,14 +15,14 @@ DataType highest_data_type(DataType type1, DataType type2)
 ReturnCode rhs_value(struct lexemeInfo **result, struct lexemeInfo *operand1, struct lexemeInfo *operand2, Operator op, int yylineno)
 {
 
-    if (op == UMINUS && operand2 == NULL)
+    if (op == UMINUS_OP && operand2 == NULL)
     {
-        if (operand1->dataType == INT)
+        if (operand1->dataType == INT_DT)
             (*result)->intValue = -operand1->intValue;
-        else if (operand1->dataType == FLOAT)
+        else if (operand1->dataType == FLOAT_DT)
             (*result)->floatValue = -operand1->floatValue;
         else
-            return FAILURE;
+            return OPERATION_NOT_SUPPORTED;
         return SUCCESS;
     }
 
@@ -48,180 +48,126 @@ ReturnCode rhs_value(struct lexemeInfo **result, struct lexemeInfo *operand1, st
 
     if (code == SUCCESS)
     {
-        if (highestDT == BOOL || highestDT == CONST_BOOL)
+        if (highestDT < INT_DT)
         {
-            int op1 = operand1->boolValue;
-            int op2 = operand2->boolValue;
-            if (op == PLUS)
+            set_lexeme(result, highestDT);
+            if (highestDT == BOOL_DT || highestDT == CONST_BOOL_DT)
             {
-                (*result)->charValue = (char)(operand1->boolValue + operand2->boolValue);
-                printf("implicit conversion from bool to char in line number: %d\n", yylineno);
-            }
-            else if (op == MINUS)
-            {
-                (*result)->charValue = (char)(operand1->boolValue - operand2->boolValue);
-                printf("implicit conversion from bool to char in line number: %d\n", yylineno);
-            }
-            else if (op == TIMES)
-            {
-                (*result)->boolValue = operand1->boolValue * operand2->boolValue;
-            }
-            else if (op == DIVIDE)
-            {
-                if (op2 == 0)
+                if (op == PLUS_OP)
                 {
-                    printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    (*result)->intValue = (int)(operand1->boolValue + operand2->boolValue);
                 }
-                (*result)->boolValue = operand1->boolValue / operand2->boolValue;
-            }
-            else if (op == MOD)
-            {
-                if (op2 == 0)
+                else if (op == MINUS_OP)
                 {
-                    printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    (*result)->intValue = (int)(operand1->boolValue - operand2->boolValue);
                 }
-                (*result)->boolValue = operand1->boolValue % operand2->boolValue;
-            }
-            else if (op == POWER)
-            {
-                if (op2 == 0 && op1 == 0)
+                else
                 {
-                    printf("0^0 is undefined in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return OPERATION_NOT_SUPPORTED;
                 }
-                (*result)->boolValue = pow(operand1->boolValue, operand2->boolValue);
+                printf("implicit conversion from bool to int in line number: %d\n", yylineno);
+            }
+            else if (highestDT == CHAR_DT || highestDT == CONST_CHAR_DT)
+            { // if its char
+                if (op == PLUS_OP)
+                {
+                    (*result)->intValue = (int)(operand1->charValue + operand2->charValue);
+                }
+                else if (op == MINUS_OP)
+                {
+                    (*result)->intValue = (int)(operand1->charValue - operand2->charValue);
+                }
+                else
+                {
+                    return OPERATION_NOT_SUPPORTED;
+                }
+                printf("implicit conversion from char to int in line number: %d\n", yylineno);
             }
         }
-        else if (highestDT == CHAR || highestDT == CONST_CHAR)
-        {
-            char op1 = operand1->charValue;
-            char op2 = operand2->charValue;
-            if (op == PLUS)
-            {
-                (*result)->charValue = (char)(operand1->charValue + operand2->charValue);
-            }
-            else if (op == MINUS)
-            {
-                (*result)->charValue = (char)(operand1->charValue - operand2->charValue);
-            }
-            else if (op == TIMES)
-            {
-                (*result)->charValue = operand1->charValue * operand2->charValue;
-            }
-            else if (op == DIVIDE)
-            {
-                if (op2 == 0)
-                {
-                    printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
-                }
-                (*result)->charValue = operand1->charValue / operand2->charValue;
-            }
-            else if (op == MOD)
-            {
-                if (op2 == 0)
-                {
-                    printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
-                }
-                (*result)->charValue = operand1->charValue % operand2->charValue;
-            }
-            else if (op == POWER)
-            {
-                if (op2 == 0 && op1 == 0)
-                {
-                    printf("0^0 is undefined in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
-                }
-                (*result)->charValue = pow(operand1->charValue, operand2->charValue);
-            }
-        }
-        else if (highestDT == INT || highestDT == CONST_INT)
+        else if (highestDT == INT_DT || highestDT == CONST_INT_DT)
         {
             int op1 = operand1->intValue;
             int op2 = operand2->intValue;
-            if (op == PLUS)
+            if (op == PLUS_OP)
             {
                 (*result)->intValue = operand1->intValue + operand2->intValue;
             }
-            else if (op == MINUS)
+            else if (op == MINUS_OP)
             {
                 (*result)->intValue = operand1->intValue - operand2->intValue;
             }
-            else if (op == TIMES)
+            else if (op == TIMES_OP)
             {
                 (*result)->intValue = operand1->intValue * operand2->intValue;
             }
-            else if (op == DIVIDE)
+            else if (op == DIVIDE_OP)
             {
                 if (op2 == 0)
                 {
                     printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return DIVISION_BY_ZERO_ERROR;
                 }
                 (*result)->intValue = operand1->intValue / operand2->intValue;
             }
-            else if (op == MOD)
+            else if (op == MOD_OP)
             {
                 if (op2 == 0)
                 {
                     printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return DIVISION_BY_ZERO_ERROR;
                 }
                 (*result)->intValue = operand1->intValue % operand2->intValue;
             }
-            else if (op == POWER)
+            else if (op == POWER_OP)
             {
                 if (op2 == 0 && op1 == 0)
                 {
                     printf("0^0 is undefined in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return DIVISION_BY_ZERO_ERROR;
                 }
                 (*result)->intValue = pow(operand1->intValue, operand2->intValue);
             }
         }
-        else if (highestDT == FLOAT || highestDT == CONST_FLOAT)
+        else if (highestDT == FLOAT_DT || highestDT == CONST_FLOAT_DT)
         {
             float op1 = operand1->floatValue;
             float op2 = operand2->floatValue;
-            if (op == PLUS)
+            if (op == PLUS_OP)
             {
                 (*result)->floatValue = operand1->floatValue + operand2->floatValue;
             }
-            else if (op == MINUS)
+            else if (op == MINUS_OP)
             {
                 (*result)->floatValue = operand1->floatValue - operand2->floatValue;
             }
-            else if (op == TIMES)
+            else if (op == TIMES_OP)
             {
                 (*result)->floatValue = operand1->floatValue * operand2->floatValue;
             }
-            else if (op == DIVIDE)
+            else if (op == DIVIDE_OP)
             {
                 if (op2 == 0)
                 {
                     printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return DIVISION_BY_ZERO_ERROR;
                 }
                 (*result)->floatValue = operand1->floatValue / operand2->floatValue;
             }
-            else if (op == MOD)
+            else if (op == MOD_OP)
             {
-                return NOT_SUPPORTED;
+                return OPERATION_NOT_SUPPORTED;
             }
-            else if (op == POWER)
+            else if (op == POWER_OP)
             {
                 if (op2 == 0 && op1 == 0)
                 {
                     printf("0^0 is undefined in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
+                    return DIVISION_BY_ZERO_ERROR;
                 }
                 (*result)->floatValue = pow(operand1->floatValue, operand2->floatValue);
             }
         }
-        else if (highestDT == STRING || highestDT == CONST_STRING)
+        else if (highestDT == STRING_DT || highestDT == CONST_STRING_DT)
         {
             return FAILURE;
         }

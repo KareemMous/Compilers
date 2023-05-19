@@ -63,6 +63,7 @@ typedef enum
     SYNTAX_ERROR,
     SEMANTIC_ERROR,
     RUNTIME_ERROR,
+    NOT_SUPPORTED
 } ReturnCode;
 
 #endif

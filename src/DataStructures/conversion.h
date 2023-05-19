@@ -209,12 +209,7 @@ ReturnCode rhs_value(struct lexemeInfo **result, struct lexemeInfo *operand1, st
             }
             else if (op == MOD)
             {
-                if (op2 == 0)
-                {
-                    printf("division by zero in line number: %d\n", yylineno);
-                    return RUNTIME_ERROR;
-                }
-                (*result)->floatValue = fmod(operand1->floatValue, operand2->floatValue);
+                return NOT_SUPPORTED;
             }
             else if (op == POWER)
             {

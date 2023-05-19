@@ -36,6 +36,14 @@ typedef enum
 
 typedef enum
 {
+    NONE,
+    DOWNGRADE_RHS,
+    UPGRADE_RHS,
+    ERROR
+} OperationsToDo;
+
+typedef enum
+{
     AND,
     OR,
     NOT,
@@ -51,6 +59,7 @@ typedef enum
 typedef enum
 {
     SUCCESS,
+    FAILURE,
     SYNTAX_ERROR,
     SEMANTIC_ERROR,
     RUNTIME_ERROR,

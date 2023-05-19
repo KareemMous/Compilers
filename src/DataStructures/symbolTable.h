@@ -4,7 +4,7 @@
 #include "symbolTableEntry.h"
 #include <stdio.h>
 
-struct variableEntry *variable_found(struct variableEntry **symbolTable, char *name)
+struct variableEntry *variable_found_in_table(struct variableEntry **symbolTable, char *name)
 {
     struct variableEntry *variable = NULL;
     HASH_FIND_STR(*symbolTable, name, variable);
@@ -19,7 +19,7 @@ struct variableEntry *variable_found(struct variableEntry **symbolTable, char *n
 ReturnCode add_variable_to_symbol_table(struct variableEntry **symbolTable, struct variableEntry *variable)
 {
 
-    if (variable_found(symbolTable, variable->name) != NULL)
+    if (variable_found_in_table(symbolTable, variable->name) != NULL)
     {
         return SEMANTIC_ERROR;
     }
@@ -36,9 +36,19 @@ ReturnCode add_variable_to_symbol_table(struct variableEntry **symbolTable, stru
     return SUCCESS;
 }
 
-ReturnCode set_variable(struct variableEntry **symbolTable, struct variableEntry *variable)
+ReturnCode set_variable_used(struct variableEntry **symbolTable, struct variableEntry *variable)
 {
 
+    struct variableEntry *newVariable = copy_variable(variable);
+    HASH_DEL(*symbolTable, variable);
+
+    newVariable->used = 1;
+    HASH_ADD_STR(*symbolTable, name, newVariable);
+    return SUCCESS;
+}
+
+ReturnCode assign_variable(struct variableEntry **symbolTable, struct variableEntry *variable)
+{
     if (variable->dataType == CONST_BOOL || variable->dataType == CONST_CHAR || variable->dataType == CONST_INT || variable->dataType == CONST_FLOAT || variable->dataType == CONST_STRING)
     {
         return SEMANTIC_ERROR;

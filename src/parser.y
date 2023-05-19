@@ -166,7 +166,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																		yyerror_with_variable("Redefinition of variable ", $2);
 																	}else{
 																		operation = implicit_conversion($1,$4->my_type);
-																		if(operation == EVAL_THEN_DOWNGRADE_RHS){
+																		if(operation == DOWNGRADE_RHS){
 																			current_return_code = downgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
@@ -174,7 +174,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
-																		}else if(operation == EVAL_THEN_UPGRADE_RHS){
+																		}else if(operation == UPGRADE_RHS){
 																
 																			current_return_code = upgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
@@ -746,6 +746,7 @@ void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,cha
 
 void check_Type_Conversion(DataType real_identifier ,struct argument_info* input_argument){
 		operation = sides_implicit_conversion(real_identifier,input_argument->my_type);
+		
 		struct lexemeInfo *input_lexeme ;
 		set_lexeme(&input_lexeme, input_argument->my_type);
 		

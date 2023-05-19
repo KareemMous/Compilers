@@ -165,23 +165,22 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																	if(add_variable_to_scope(current_scope, $2, 1, $1,VARIABLE_KIND,NULL,0) == FAILURE){
 																		yyerror_with_variable("Redefinition of variable ", $2);
 																	}else{
-																		operation = sides_implicit_conversion($1,$4->my_type);
-																		if(operation == DOWNGRADE_RHS){
-																			// downgrade conv to result dt needed
-																			current_return_code = down_convert_type(&$4,$4->my_type, $1,yylineno);
+																		operation = implicit_conversion($1,$4->my_type);
+																		if(operation == EVAL_THEN_DOWNGRADE_RHS){
+																			current_return_code = downgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
-																				// quadraples
+																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
-																		}else if(operation == UPGRADE_RHS){
-																			// upgrade to result dt needed
-																			current_return_code = up_convert_my_type(&$4,$4->my_type, $1,yylineno);
+																		}else if(operation == EVAL_THEN_UPGRADE_RHS){
+																
+																			current_return_code = upgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
-																				// quadraples
+																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
 																		}else if(operation == ERROR){

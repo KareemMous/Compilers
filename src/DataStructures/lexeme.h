@@ -28,7 +28,7 @@ struct argument_info
 {
     DataType my_type;
     char *my_name;
-    struct argument_info *next_arg; // points to next arguments in linked list
+    struct argument_info *next_arg;
 };
 
 #endif

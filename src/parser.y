@@ -168,21 +168,20 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																	}else{
 																		operation = implicit_conversion($1,$4->my_type);
 																		if(operation == EVAL_THEN_DOWNGRADE_RHS){
-																			// downgrade conv to result dt needed
 																			current_return_code = downgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
-																				// quadraples
+																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
 																		}else if(operation == EVAL_THEN_UPGRADE_RHS){
-																			// upgrade to result dt needed
+																
 																			current_return_code = upgrade_my_value(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
-																				// quadraples
+																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
 																		}else if(operation == RAISE_ERROR){

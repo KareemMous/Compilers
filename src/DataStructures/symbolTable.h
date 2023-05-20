@@ -67,11 +67,11 @@ void print(struct variableEntry **symbolTable, FILE *file)
     fputs("Symbol Table:\n", file);
     struct variableEntry *tmp;
 
-    fputs("Name\t\tType\t\tDataType\t\tInitialized\t\tValue\n", file);
+    fputs("variable name \t data_type \t is_initialized \t kind \n", file);
 
     for (tmp = *symbolTable; tmp != NULL; tmp = (struct variableEntry *)(tmp->hh.next))
     {
-        fprintf(file, "%s\t\t%s\t\t%s\t\t%d\t\t", tmp->name, tmp->type, tmp->dataType, tmp->is_initialized);
+        fprintf(file, "%s \t %d \t %d \t %d \n", tmp->name, tmp->dataType, tmp->is_initialized, tmp->type);
     }
     fprintf(file, "\n");
 }

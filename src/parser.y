@@ -62,6 +62,7 @@
 	%token <floatValue> FLOAT
 	%token <boolValue> BOOL
 	%token <stringValue> STRING
+	%token ENUM
 	%token CONST
 	%token VOID
 
@@ -240,8 +241,18 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 	|   FUNCTIONS
 	| 	Function_Calls SEMICOLON
 	| 	Switch_Case
+	| Enum_Declaration
 	;
 
+Enum_Declaration: ENUM IDENTIFIER OCBRACKET ENUM_LIST CCBRACKET SEMICOLON
+			| ENUM IDENTIFIER SEMICOLON
+			;
+ENUM_LIST:
+		ENUM_LIST COMMA IDENTIFIER
+		| ENUM_LIST COMMA IDENTIFIER ASSIGN EXPRESSION
+		| IDENTIFIER
+		| IDENTIFIER ASSIGN EXPRESSION
+		;
 
 EXPRESSION: Number_Declaration {$$ =$1;}
 		| 	Boolean_Expression {$$ =$1;}
@@ -446,7 +457,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 												}else if(current_identifier->dataType==STRING_DT){
 													yyerror_with_variable("Invalid Operation on strings",$1);
 												}else{
-													// push in quadraples 1 x x +
+													// push in quadraples x 1 x +
 													push(quad_stack,"1",NULL,quadraplesFile);push(quad_stack,current_identifier->name,NULL,quadraplesFile);push(quad_stack,"+",current_identifier->name,quadraplesFile);
 												}
 											}
@@ -455,6 +466,9 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 													yyerror_with_variable("identifier not declared in this scope",$1);
 												}else if(current_identifier->dataType==STRING_DT){
 													yyerror_with_variable("Invalid Operation on strings",$1);
+												}else{
+													// push in quadraples x 1 x -
+													push(quad_stack,"1",NULL,quadraplesFile);push(quad_stack,current_identifier->name,NULL,quadraplesFile);push(quad_stack,"-",current_identifier->name,quadraplesFile);
 												}
 											}
 				; 
@@ -779,7 +793,6 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 	remove( "symbolTables.txt" );
 
 	yyin = fopen("input.txt", "r");
-	printf("REAdd file\n");
 	symbolTableFile = fopen("symbolTables.txt", "a");
 	remove( "quadraples.txt" );
 	quadraplesFile = fopen("quadraples.txt", "a");

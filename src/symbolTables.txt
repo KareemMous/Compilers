@@ -1,7 +1,6 @@
 Symbol Table:
 variable name 	 data_type 	 is_initialized 	 kind 
 y 	 4 	 1 	 2 
-x 	 4 	 1 	 2 
 
 Symbol Table:
 variable name 	 data_type 	 is_initialized 	 kind 

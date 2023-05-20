@@ -1652,7 +1652,7 @@ yyreduce:
 
 /* Line 1455 of yacc.c  */
 #line 153 "parser.y"
-    { current_return_code =add_variable_to_scope(current_scope, (yyvsp[(2) - (3)].variableName), 0, (yyvsp[(1) - (3)].intValue),variable,NULL,0);
+    { current_return_code =add_variable_to_scope(current_scope, (yyvsp[(2) - (3)].variableName), 0, (yyvsp[(1) - (3)].intValue),variable_type,NULL,0);
 												if(current_return_code == FAILURE)
 													yyerror_with_variable("Redefinition of variable ", (yyvsp[(2) - (3)].variableName));
 												else if(current_return_code == CONSTANT_NOT_INITIALIZED)
@@ -1669,7 +1669,7 @@ yyreduce:
 																	if((yyvsp[(4) - (5)].information)->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	if(add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 1, (yyvsp[(1) - (5)].intValue),variable,NULL,0) == FAILURE){
+																	if(add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 1, (yyvsp[(1) - (5)].intValue),variable_type,NULL,0) == FAILURE){
 																		yyerror_with_variable("Redefinition of variable ", (yyvsp[(2) - (5)].variableName));
 																	}else{
 																		operation = sides_implicit_conversion((yyvsp[(1) - (5)].intValue),(yyvsp[(4) - (5)].information)->my_type);
@@ -2291,7 +2291,7 @@ yyreduce:
 					int no_of_args = 0 ;
 					DataType* arguments_list = get_parameters_of_array((yyvsp[(4) - (5)].argument_info),&no_of_args);
 					// adding function to the symbol table
-					current_return_code = add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 0, (yyvsp[(1) - (5)].intValue), function, arguments_list,no_of_args);
+					current_return_code = add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 0, (yyvsp[(1) - (5)].intValue), function_type, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
 						yyerror_with_variable("Redefinition of function ", (yyvsp[(2) - (5)].variableName));
 					}
@@ -2317,7 +2317,7 @@ yyreduce:
 					int no_of_args = 0 ;
 					DataType* arguments_list = get_parameters_of_array((yyvsp[(4) - (5)].argument_info),&no_of_args);
 					// adding function to the symbol table
-					current_return_code = add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 0, VOID_DT, function, arguments_list,no_of_args);
+					current_return_code = add_variable_to_scope(current_scope, (yyvsp[(2) - (5)].variableName), 0, VOID_DT, function_type, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
 						yyerror_with_variable("Redefinition of function ", (yyvsp[(2) - (5)].variableName));
 					}
@@ -2790,7 +2790,7 @@ yyreturn:
 	struct argument_info* start_ptr = temp;
 	while(start_ptr){
 		// adding each parameter to the symbol table assuming its init
-		current_return_code = add_variable_to_scope(current_scope, start_ptr->my_name, 1, start_ptr->my_type,parameter,NULL,0);
+		current_return_code = add_variable_to_scope(current_scope, start_ptr->my_name, 1, start_ptr->my_type,parameter_type,NULL,0);
 		if(current_return_code == FAILURE)
 		{
 			yyerror_with_variable("Redefinition of parameter in function ", start_ptr->my_name);
@@ -2879,7 +2879,8 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 	// clearing files before working
 	remove( "symbolTables.txt" );
 
-	yyin = fopen("test1.cpp.txt", "r");
+	yyin = fopen("input.txt", "r");
+	printf("REAdd file\n");
 	symbolTableFile = fopen("symbolTables.txt", "a");
 	remove( "quadraples.txt" );
 	quadraplesFile = fopen("quadraples.txt", "a");

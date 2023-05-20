@@ -1,0 +1,4 @@
+Symbol Table:
+variable name 	 data_type 	 is_initialized 	 kind 
+x 	 4 	 1 	 2 
+

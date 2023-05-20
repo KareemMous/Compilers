@@ -3,9 +3,9 @@
 
 typedef enum
 {
-    function,
-    parameter,
-    variable
+    function_type,
+    parameter_type,
+    variable_type
 } Type;
 
 typedef enum

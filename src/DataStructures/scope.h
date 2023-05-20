@@ -116,6 +116,13 @@ void delete_all_variables_in_scope(struct scope *scope)
 
     HASH_ITER(hh, scope->symbolTable, variable, tmp)
     {
+        if (variable->used == 0)
+        {
+            if (strcmp(variable->name, "main") != 0)
+            {
+                printf("Variable initialized but not used %s\n", variable->name);
+            }
+        }
         HASH_DEL(scope->symbolTable, variable);
         free(variable);
     }

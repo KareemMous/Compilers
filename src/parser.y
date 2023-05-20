@@ -133,8 +133,8 @@
 	void check_Type_Conversion(DataType ,struct argument_info*);
 
 	// variables to use through the code to check semantics
-	struct variable_entry * current_identifier;
-	RETURN_CODES current_return_code;
+	struct variableEntry * current_identifier;
+	ReturnCode current_return_code;
 	OperationsToDo operation;
 
 	struct Stack * quad_stack;
@@ -150,7 +150,7 @@ statements: statements stmt
 			|		
 			;
 		
-stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable_to_scope(current_scope, $2, 0, $1,VARIABLE_KIND,NULL,0);
+stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable_to_scope(current_scope, $2, 0, $1,variable,NULL,0);
 												if(current_return_code == FAILURE)
 													yyerror_with_variable("Redefinition of variable ", $2);
 												else if(current_return_code == CONSTANT_NOT_INITIALIZED)
@@ -162,7 +162,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																	if($4->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	if(add_variable_to_scope(current_scope, $2, 1, $1,VARIABLE_KIND,NULL,0) == FAILURE){
+																	if(add_variable_to_scope(current_scope, $2, 1, $1,variable,NULL,0) == FAILURE){
 																		yyerror_with_variable("Redefinition of variable ", $2);
 																	}else{
 																		operation = implicit_conversion($1,$4->my_type);
@@ -204,10 +204,10 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 														yyerror_with_variable("cant reassign a constant variable :", $1);
 													else{
 															current_identifier = variable_found_in_scope(current_scope,$1);
-															operation = sides_implicit_conversion(current_identifier->my_datatype,$3->my_type);
+															operation = sides_implicit_conversion(current_identifier->dataType,$3->my_type);
 															if(operation == DOWNGRADE_RHS){
 																// downgrade conv to result dt needed
-																current_return_code = down_convert_type(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
+																current_return_code = down_convert_type(&$3,$3->my_type, current_identifier->dataType,yylineno);
 																if(current_return_code == STRING_INVALID_OPERATION){
 																	yyerror("invalid string conversion");
 																}else{
@@ -216,7 +216,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																}
 															}else if(operation == UPGRADE_RHS){
 																// upgrade to result dt needed
-																current_return_code = up_convert_my_type(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
+																current_return_code = up_convert_my_type(&$3,$3->my_type, current_identifier->dataType,yylineno);
 																if(current_return_code == STRING_INVALID_OPERATION){
 																	yyerror("invalid string conversion");
 																}else{
@@ -267,7 +267,7 @@ Number_Declaration: FLOAT 	{set_lexeme(&$$, FLOAT_DT); $$->floatValue = $1;$$->v
 							yyerror_with_variable("identifier not declared in this scope",$1 );
 							$$ = NULL;
 						}else{
-							set_lexeme(&$$,current_identifier->my_datatype);
+							set_lexeme(&$$,current_identifier->dataType);
 							$$->variableName = $1;
 							$$->is_initialized = current_identifier->is_initialized;
 							set_variable_used_in_scope(current_scope, $1);
@@ -327,7 +327,7 @@ Number_Declaration: FLOAT 	{set_lexeme(&$$, FLOAT_DT); $$->floatValue = $1;$$->v
 																 	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  rhs_value(&$$,$1,$3,MULTIPLY_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,TIMES_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -342,7 +342,7 @@ Number_Declaration: FLOAT 	{set_lexeme(&$$, FLOAT_DT); $$->floatValue = $1;$$->v
 																 	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  rhs_value(&$$,$1,$3,REM_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,MOD_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -443,7 +443,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 				|   	IDENTIFIER INCREMENT {	current_identifier = variable_found_in_scope(current_scope,$1);
 												if(current_identifier == NULL){
 													yyerror_with_variable("identifier not declared in this scope",$1);
-												}else if(current_identifier->my_datatype==STRING_DT){
+												}else if(current_identifier->dataType==STRING_DT){
 													yyerror_with_variable("Invalid Operation on strings",$1);
 												}else{
 													// push in quadraples 1 x x +
@@ -453,7 +453,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 				|   	IDENTIFIER DECREMENT {	current_identifier = variable_found_in_scope(current_scope,$1);
 												if(current_identifier == NULL){
 													yyerror_with_variable("identifier not declared in this scope",$1);
-												}else if(current_identifier->my_datatype==STRING_DT){
+												}else if(current_identifier->dataType==STRING_DT){
 													yyerror_with_variable("Invalid Operation on strings",$1);
 												}
 											}
@@ -501,7 +501,7 @@ FUNCTIONS : Type_Identifier IDENTIFIER ORBRACKET ARGUMENTS CRBRACKET {
 					int no_of_args = 0 ;
 					DataType* arguments_list = get_parameters_of_array($4,&no_of_args);
 					// adding function to the symbol table
-					current_return_code = add_variable_to_scope(current_scope, $2, 0, $1, FUNCTION_KIND, arguments_list,no_of_args);
+					current_return_code = add_variable_to_scope(current_scope, $2, 0, $1, function, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
 						yyerror_with_variable("Redefinition of function ", $2);
 					}
@@ -515,7 +515,7 @@ FUNCTIONS : Type_Identifier IDENTIFIER ORBRACKET ARGUMENTS CRBRACKET {
 					int no_of_args = 0 ;
 					DataType* arguments_list = get_parameters_of_array($4,&no_of_args);
 					// adding function to the symbol table
-					current_return_code = add_variable_to_scope(current_scope, $2, 0, VOID_DT, FUNCTION_KIND, arguments_list,no_of_args);
+					current_return_code = add_variable_to_scope(current_scope, $2, 0, VOID_DT, function, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
 						yyerror_with_variable("Redefinition of function ", $2);
 					}
@@ -585,7 +585,7 @@ Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 								}else{
 									// identifer is sent
 									// first of all we need to check that the variable passed is in table
-									struct variable_entry * arg_identifier = variable_found_in_scope(current_scope,$3->my_name);
+									struct variableEntry * arg_identifier = variable_found_in_scope(current_scope,$3->my_name);
 									if(arg_identifier == NULL){
 										yyerror("variable in the argument list not initialzed in this scope");
 									}else{
@@ -605,7 +605,7 @@ Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 							}
 							if(success == 1){
 								set_variable_used_in_scope(current_scope, current_identifier->name);
-								set_lexeme(&$$,current_identifier->my_datatype);
+								set_lexeme(&$$,current_identifier->dataType);
 								$$->variableName = $1;
 							}else{
 								$$ = NULL;
@@ -689,7 +689,7 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 	struct argument_info* start_ptr = temp;
 	while(start_ptr){
 		// adding each parameter to the symbol table assuming its init
-		current_return_code = add_variable_to_scope(current_scope, start_ptr->my_name, 1, start_ptr->my_type,PARAMETER_KIND,NULL,0);
+		current_return_code = add_variable_to_scope(current_scope, start_ptr->my_name, 1, start_ptr->my_type,parameter,NULL,0);
 		if(current_return_code == FAILURE)
 		{
 			yyerror_with_variable("Redefinition of parameter in function ", start_ptr->my_name);
@@ -716,10 +716,10 @@ void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,cha
 	if(current_identifier == NULL){
 		yyerror_with_variable("identifier not declared in this scope",lhs );
 	}else{
-		operation = sides_implicit_conversion(current_identifier->my_datatype,(*rhs)->my_type);
+		operation = sides_implicit_conversion(current_identifier->dataType,(*rhs)->my_type);
 		if(operation == DOWNGRADE_RHS){
 			// downgrade conv to result dt needed
-			current_return_code = down_convert_type(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
+			current_return_code = down_convert_type(rhs,(*rhs)->my_type, current_identifier->dataType,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}else{
@@ -728,7 +728,7 @@ void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,cha
 			}
 		}else if(operation == UPGRADE_RHS){
 			// upgrade to result dt needed
-			current_return_code = up_convert_my_type(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
+			current_return_code = up_convert_my_type(rhs,(*rhs)->my_type, current_identifier->dataType,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}else{
@@ -752,7 +752,7 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 		
 		if(operation == DOWNGRADE_RHS){
 			// downgrade conv to result dt needed
-			current_return_code = down_convert_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
+			current_return_code = down_convert_type(&input_lexeme,input_lexeme->dataType, real_identifier,yylineno);
 			
 			
 			if(current_return_code == STRING_INVALID_OPERATION){
@@ -762,7 +762,7 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 		}else if(operation == UPGRADE_RHS){
 			// upgrade to result dt needed
 			
-			current_return_code = up_convert_my_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
+			current_return_code = up_convert_my_type(&input_lexeme,input_lexeme->dataType, real_identifier,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}

@@ -58,7 +58,7 @@ ReturnCode add_variable_to_scope(struct scope *scope, char *name, Type type, Dat
     variable->name = name;
     variable->type = type;
     variable->dataType = dataType;
-    variable->parameterTypes = parameterTypes;
+    variable->params = parameterTypes;
     variable->parameterCount = parameterCount;
     variable->is_initialized = initialized;
     variable->used = 0;
@@ -85,7 +85,7 @@ ReturnCode set_variable_used_in_scope(struct scope *scope, char *variableName)
         }
         parent = getParent(parent);
     }
-    return SYNTAX_ERROR;
+    return FAILURE;
 }
 
 ReturnCode assign_variable_in_scope(struct scope *scope, char *variableName)

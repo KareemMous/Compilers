@@ -44,16 +44,15 @@ typedef enum
 
 typedef enum
 {
-    AND,
-    OR,
-    NOT,
-    EQ,
-    EQEQ,
-    NEQ,
-    LT,
-    GT,
-    LEQ,
-    GEQ
+    AND_OP,
+    OR_OP,
+    NOT_OP,
+    GREATERTHAN_OP,
+    GREATERTHANOREQUAL_OP,
+    LESSTHAN_OP,
+    LESSTHANOREQUAL_OP,
+    EQUALEQUAL_OP,
+    NOTEQUAL_OP
 } RelationalOperator;
 
 typedef enum

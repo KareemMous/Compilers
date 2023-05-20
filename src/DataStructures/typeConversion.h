@@ -6,7 +6,7 @@
 
 ReturnCode down_convert_type(struct lexemeInfo **lexeme, DataType oldDT, DataType newDT, int yylineno)
 {
-    int yylineno;
+    
     if (oldDT == newDT)
         return SUCCESS;
 
@@ -109,7 +109,7 @@ ReturnCode up_convert_my_type(struct lexemeInfo **lexeme, DataType oldDT, DataTy
 
 ReturnCode down_convert_booleans(struct lexemeInfo **result, struct lexemeInfo *firstExp, struct lexemeInfo *secExp, RelationalOperator op)
 {
-    if (firstExp->dataType == STRING_DT || secExp->dataType == STRING_DT || firstExp->dataType == CONST_STRING_DT || secExp->dataType == CONST_STRING_DT)
+    if (firstExp->my_type == STRING_DT || secExp->my_type == STRING_DT || firstExp->my_type == CONST_STRING_DT || secExp->my_type == CONST_STRING_DT)
         return STRING_INVALID_OPERATION;
 
     set_lexeme(result, BOOL_DT);

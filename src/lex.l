@@ -61,7 +61,7 @@
 "string"  return STRING;
 "const"	return CONST;
 "void"	return VOID;
-"enum"	return ENUM;
+
 
 "false"	{yylval.boolValue = 0 ; return FALSE;}
 "true"	{yylval.boolValue = 1 ; return TRUE;}

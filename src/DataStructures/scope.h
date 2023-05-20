@@ -129,7 +129,7 @@ struct scope *delete_scope(struct scope *scope)
     return parent;
 }
 
-void print_symbol_tables_in_scope(struct scope *scope, FILE *file)
+void print_symbol_table_in_scope(struct scope *scope, FILE *file)
 {
     print(&scope->symbolTable, file);
 }

@@ -79,20 +79,19 @@
      FLOAT = 295,
      BOOL = 296,
      STRING = 297,
-     ENUM = 298,
-     CONST = 299,
-     VOID = 300,
-     BREAK = 301,
-     CONTINUE = 302,
-     IDENTIFIER = 303,
-     SWITCH = 304,
-     CASE = 305,
-     FALSE = 306,
-     TRUE = 307,
-     RET = 308,
-     DEFAULT = 309,
-     IFX = 310,
-     UMINUS = 311
+     CONST = 298,
+     VOID = 299,
+     BREAK = 300,
+     CONTINUE = 301,
+     IDENTIFIER = 302,
+     SWITCH = 303,
+     CASE = 304,
+     FALSE = 305,
+     TRUE = 306,
+     RET = 307,
+     DEFAULT = 308,
+     IFX = 309,
+     UMINUS = 310
    };
 #endif
 
@@ -117,7 +116,7 @@ typedef union YYSTYPE
 
 
 /* Line 1676 of yacc.c  */
-#line 121 "parser.tab.h"
+#line 120 "parser.tab.h"
 } YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */

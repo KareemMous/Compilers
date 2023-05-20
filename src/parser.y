@@ -108,7 +108,7 @@
 	#include "DataStructures/scope.h"
 	#include "DataStructures/quadruple.h"
 	#include "DataStructures/typeConversion.h"
-	#include "DataStructures/conversions.h"
+	#include "DataStructures/conversion.h"
 
 
 	int yyerror(char *);
@@ -165,9 +165,9 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																	if(add_variable_to_scope(current_scope, $2, 1, $1,variable,NULL,0) == FAILURE){
 																		yyerror_with_variable("Redefinition of variable ", $2);
 																	}else{
-																		operation = implicit_conversion($1,$4->my_type);
+																		operation = sides_implicit_conversion($1,$4->my_type);
 																		if(operation == DOWNGRADE_RHS){
-																			current_return_code = downgrade_my_value(&$4,$4->my_type, $1,yylineno);
+																			current_return_code = down_convert_type(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
@@ -176,7 +176,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																			}
 																		}else if(operation == UPGRADE_RHS){
 																
-																			current_return_code = upgrade_my_value(&$4,$4->my_type, $1,yylineno);
+																			current_return_code = up_convert_my_type(&$4,$4->my_type, $1,yylineno);
 																			if(current_return_code == STRING_INVALID_OPERATION){
 																				yyerror("invalid string conversion");
 																			}else{
@@ -778,7 +778,7 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 	// clearing files before working
 	remove( "symbolTables.txt" );
 
-	yyin = fopen("input.txt", "r");
+	yyin = fopen("test1.cpp.txt", "r");
 	symbolTableFile = fopen("symbolTables.txt", "a");
 	remove( "quadraples.txt" );
 	quadraplesFile = fopen("quadraples.txt", "a");

@@ -128,10 +128,10 @@
 	// Functions Declaration
 	void enter_new_scope();
 	void exit_a_scope();
-	DataTypes* get_parameters_of_array(struct argument_info*,int*);
-	void add_parameters_to_function_symbol_table(DataTypes*, struct argument_info*);
+	DataType* get_parameters_of_array(struct argument_info*,int*);
+	void add_parameters_to_function_symbol_table(DataType*, struct argument_info*);
 	void assigning_operation_with_conversion(char* , struct lexemeInfo **,char*);
-	void check_Type_Conversion(DataTypes ,struct argument_info*);
+	void check_Type_Conversion(DataType ,struct argument_info*);
 
 	// variables to use through the code to check semantics
 	struct variable_entry * current_identifier;
@@ -184,7 +184,7 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 																				
 																				push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$2,quadraplesFile);
 																			}
-																		}else if(operation == RAISE_ERROR){
+																		}else if(operation == ERROR){
 																			yyerror("invalid string conversion");
 																		}else{
 																				// quadraples
@@ -198,33 +198,33 @@ stmt:   Type_Identifier IDENTIFIER SEMICOLON { current_return_code =add_variable
 													if($3->is_initialized==0){
 														yyerror("use of uninitialized variable");
 													}
-													current_return_code = assign_previously_declared_variable_in_scope(current_scope, $1);
+													current_return_code = assign_variable_in_scope(current_scope, $1);
 													if(current_return_code == FAILURE)
 														yyerror_with_variable("Undeclared variable ", $1);
 													else if(current_return_code == CONSTANT_REASSIGNMENT)
 														yyerror_with_variable("cant reassign a constant variable :", $1);
 													else{
-															current_identifier = find_variable_in_scope(current_scope,$1);
-															operation = implicit_conversion(current_identifier->my_datatype,$3->my_type);
-															if(operation == EVAL_THEN_DOWNGRADE_RHS){
+															current_identifier = variable_found_in_scope(current_scope,$1);
+															operation = sides_implicit_conversion(current_identifier->my_datatype,$3->my_type);
+															if(operation == DOWNGRADE_RHS){
 																// downgrade conv to result dt needed
-																current_return_code = downgrade_my_value(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
+																current_return_code = down_convert_type(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
 																if(current_return_code == STRING_INVALID_OPERATION){
 																	yyerror("invalid string conversion");
 																}else{
 																	// quadraples
 																	push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$1,quadraplesFile);
 																}
-															}else if(operation == EVAL_THEN_UPGRADE_RHS){
+															}else if(operation == UPGRADE_RHS){
 																// upgrade to result dt needed
-																current_return_code = upgrade_my_value(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
+																current_return_code = up_convert_my_type(&$3,$3->my_type, current_identifier->my_datatype,yylineno);
 																if(current_return_code == STRING_INVALID_OPERATION){
 																	yyerror("invalid string conversion");
 																}else{
 																	// quadraples
 																	push(quad_stack," ",NULL,quadraplesFile);push(quad_stack,"=",$1,quadraplesFile);
 																}
-															}else if(operation == RAISE_ERROR){
+															}else if(operation == ERROR){
 																yyerror("invalid string conversion");
 															}else{
 																// quadraples
@@ -260,26 +260,26 @@ EXPRESSION: Number_Declaration {$$ =$1;}
 		|	Function_Calls	{$$ =$1;}
 		;
 
-Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$$->variableName=NULL;
+Number_Declaration: FLOAT 	{set_lexeme(&$$, FLOAT_DT); $$->floatValue = $1;$$->variableName=NULL;
 							// setting the quadraple info
 							char buf[100];
   							gcvt($$->floatValue, 2, buf);
 							push( quad_stack, buf,NULL,quadraplesFile);
 							}
 				
-				|	INT 	{set_lexemeInfo(&$$, INT_DT); $$->intValue = $1; $$->variableName=NULL;
+				|	INT 	{set_lexeme(&$$, INT_DT); $$->intValue = $1; $$->variableName=NULL;
 							// setting the quadraple info
 							char temp[4]; 
 							push( quad_stack, itoa(($$->intValue),temp,10), NULL,quadraplesFile);
 							}
 
 				|   IDENTIFIER { 
-						current_identifier = find_variable_in_scope(current_scope,$1);
+						current_identifier = variable_found_in_scope(current_scope,$1);
 						if(current_identifier == NULL){
 							yyerror_with_variable("identifier not declared in this scope",$1 );
 							$$ = NULL;
 						}else{
-							set_lexemeInfo(&$$,current_identifier->my_datatype);
+							set_lexeme(&$$,current_identifier->my_datatype);
 							$$->variableName = $1;
 							$$->is_initialized = current_identifier->is_initialized;
 							set_variable_used_in_scope(current_scope, $1);
@@ -291,7 +291,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,PLUS_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,PLUS_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -307,7 +307,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																		 if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,MINUS_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,MINUS_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -322,7 +322,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,DIVIDE_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,DIVIDE_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -339,7 +339,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																 	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,MULTIPLY_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,MULTIPLY_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -354,7 +354,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																 	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,REM_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,REM_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -369,7 +369,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																 	if($1->is_initialized==0 || $3->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$1,$3,POWER_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$1,$3,POWER_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -385,7 +385,7 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 														 			if($2->is_initialized==0){
 																		yyerror("use of uninitialized variable");
 																	}
-																	current_return_code =  compute_rhs_value(&$$,$2,NULL,UMINUS_OP,yylineno);
+																	current_return_code =  rhs_value(&$$,$2,NULL,UMINUS_OP,yylineno);
 																	if(current_return_code == STRING_INVALID_OPERATION){
 																		yyerror("invalid operation on strings");
 																	}else if(current_return_code == OPERATION_NOT_SUPPORTED){
@@ -397,49 +397,49 @@ Number_Declaration: FLOAT 	{set_lexemeInfo(&$$, FLOAT_DT); $$->floatValue = $1;$
 																	}
 														}
 													}	
-				|	TRUE			{set_lexemeInfo(&$$, BOOL_DT); $$->boolValue = 1; push(quad_stack, "true",NULL,quadraplesFile);}
-				|	FALSE			{set_lexemeInfo(&$$, BOOL_DT); $$->boolValue = 0; push(quad_stack, "false",NULL,quadraplesFile);}
-				| 	CHAR			{set_lexemeInfo(&$$, CHAR_DT); $$->charValue = $1; char x[1]="";strncat(x, &$1, 1); push(quad_stack,x,NULL,quadraplesFile);}
-				| 	STRING			{set_lexemeInfo(&$$, STRING_DT); $$->stringValue = $1;push(quad_stack, $1,NULL,quadraplesFile);}
+				|	TRUE			{set_lexeme(&$$, BOOL_DT); $$->boolValue = 1; push(quad_stack, "true",NULL,quadraplesFile);}
+				|	FALSE			{set_lexeme(&$$, BOOL_DT); $$->boolValue = 0; push(quad_stack, "false",NULL,quadraplesFile);}
+				| 	CHAR			{set_lexeme(&$$, CHAR_DT); $$->charValue = $1; char x[1]="";strncat(x, &$1, 1); push(quad_stack,x,NULL,quadraplesFile);}
+				| 	STRING			{set_lexeme(&$$, STRING_DT); $$->stringValue = $1;push(quad_stack, $1,NULL,quadraplesFile);}
 				;
 
 
 /* defining boolean expression */
 Boolean_Expression: 
 					
-					EXPRESSION AND EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, AND_OP);
+					EXPRESSION AND EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, AND_OP);
 													if(current_return_code == STRING_INVALID_OPERATION)
 														yyerror("Invalid String Conversion to Boolean ");
 												}
-					| EXPRESSION OR EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, OR_OP);
+					| EXPRESSION OR EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, OR_OP);
 													if(current_return_code == STRING_INVALID_OPERATION)
 														yyerror("Invalid String Conversion to Boolean ");
 												}
-					| NOT EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $2, NULL, NOT_OP);
+					| NOT EXPRESSION { current_return_code = down_convert_booleans(&$$, $2, NULL, NOT_OP);
 													if(current_return_code == STRING_INVALID_OPERATION)
 														yyerror("Invalid String Conversion to Boolean ");
 									}
-					| EXPRESSION GREATERTHAN EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, GREATERTHAN_OP);
+					| EXPRESSION GREATERTHAN EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, GREATERTHAN_OP);
 															if(current_return_code == STRING_INVALID_OPERATION)
 																yyerror("Invalid String Conversion to Boolean ");
 														}
-					| EXPRESSION GREATERTHANOREQUAL EXPRESSION{ current_return_code = down_convert_boolean_expression(&$$, $1, $3, GREATERTHANOREQUAL_OP);
+					| EXPRESSION GREATERTHANOREQUAL EXPRESSION{ current_return_code = down_convert_booleans(&$$, $1, $3, GREATERTHANOREQUAL_OP);
 																if(current_return_code == STRING_INVALID_OPERATION)
 																	yyerror("Invalid String Conversion to Boolean ");
 															}
-					| EXPRESSION LESSTHAN EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, LESSTHAN_OP);
+					| EXPRESSION LESSTHAN EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, LESSTHAN_OP);
 																if(current_return_code == STRING_INVALID_OPERATION)
 																	yyerror("Invalid String Conversion to Boolean ");
 															}
-					| EXPRESSION LESSTHANOREQUAL EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, LESSTHANOREQUAL_OP);
+					| EXPRESSION LESSTHANOREQUAL EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, LESSTHANOREQUAL_OP);
 																if(current_return_code == STRING_INVALID_OPERATION)
 																	yyerror("Invalid String Conversion to Boolean ");
 															}
-					| EXPRESSION EQUALEQUAL EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, EQUALEQUAL_OP);
+					| EXPRESSION EQUALEQUAL EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, EQUALEQUAL_OP);
 																if(current_return_code == STRING_INVALID_OPERATION)
 																	yyerror("Invalid String Conversion to Boolean ");
 															}
-					| EXPRESSION NOTEQUAL EXPRESSION { current_return_code = down_convert_boolean_expression(&$$, $1, $3, NOTEQUAL_OP);
+					| EXPRESSION NOTEQUAL EXPRESSION { current_return_code = down_convert_booleans(&$$, $1, $3, NOTEQUAL_OP);
 																if(current_return_code == STRING_INVALID_OPERATION)
 																	yyerror("Invalid String Conversion to Boolean ");
 														}
@@ -452,7 +452,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 				|		IDENTIFIER MULTIPLYEQUAL Number_Declaration {assigning_operation_with_conversion($1, &$3,"*");}
 				|		IDENTIFIER DIVIDEEQUAL Number_Declaration {assigning_operation_with_conversion($1, &$3,"/");}
 				|		IDENTIFIER REMEQUAL Number_Declaration {assigning_operation_with_conversion($1, &$3,"%");}
-				|   	IDENTIFIER INCREMENT {	current_identifier = find_variable_in_scope(current_scope,$1);
+				|   	IDENTIFIER INCREMENT {	current_identifier = variable_found_in_scope(current_scope,$1);
 												if(current_identifier == NULL){
 													yyerror_with_variable("identifier not declared in this scope",$1);
 												}else if(current_identifier->my_datatype==STRING_DT){
@@ -462,7 +462,7 @@ Mathematical_Statement: IDENTIFIER PLUSEQUAL Number_Declaration {assigning_opera
 													push(quad_stack,"1",NULL,quadraplesFile);push(quad_stack,current_identifier->variable_name,NULL,quadraplesFile);push(quad_stack,"+",current_identifier->variable_name,quadraplesFile);
 												}
 											}
-				|   	IDENTIFIER DECREMENT {	current_identifier = find_variable_in_scope(current_scope,$1);
+				|   	IDENTIFIER DECREMENT {	current_identifier = variable_found_in_scope(current_scope,$1);
 												if(current_identifier == NULL){
 													yyerror_with_variable("identifier not declared in this scope",$1);
 												}else if(current_identifier->my_datatype==STRING_DT){
@@ -511,7 +511,7 @@ Type_Identifier:  INT {$$ = INT_DT; }
 FUNCTIONS : Type_Identifier IDENTIFIER ORBRACKET ARGUMENTS CRBRACKET {
 					//getting arguments of these function
 					int no_of_args = 0 ;
-					DataTypes* arguments_list = get_parameters_of_array($4,&no_of_args);
+					DataType* arguments_list = get_parameters_of_array($4,&no_of_args);
 					// adding function to the symbol table
 					current_return_code = add_variable_to_scope(current_scope, $2, 0, $1, FUNCTION_KIND, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
@@ -525,7 +525,7 @@ FUNCTIONS : Type_Identifier IDENTIFIER ORBRACKET ARGUMENTS CRBRACKET {
 			| VOID IDENTIFIER ORBRACKET ARGUMENTS CRBRACKET {
 					//getting arguments of these function
 					int no_of_args = 0 ;
-					DataTypes* arguments_list = get_parameters_of_array($4,&no_of_args);
+					DataType* arguments_list = get_parameters_of_array($4,&no_of_args);
 					// adding function to the symbol table
 					current_return_code = add_variable_to_scope(current_scope, $2, 0, VOID_DT, FUNCTION_KIND, arguments_list,no_of_args);
 					if(current_return_code == FAILURE){
@@ -571,19 +571,19 @@ Arguments_Call : EXPRESSION COMMA  Arguments_Call{ $$ = (struct argument_info *)
 Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 				| IDENTIFIER ORBRACKET Arguments_Call CRBRACKET { 
 						// first of all we need to find the function
-						current_identifier = find_variable_in_scope(current_scope,$1);
+						current_identifier = variable_found_in_scope(current_scope,$1);
 						if(current_identifier == NULL){
 							yyerror("function not initialzed in this scope");
 						}else{
 							// we need to match the parameters with the real arguments
 							// the real input params to function
-							DataTypes *my_params = current_identifier->params;
+							DataType *my_params = current_identifier->params;
 
-							int no_of_params = current_identifier->no_of_params;
+							int parameterCount = current_identifier->parameterCount;
 							int i = 0;
 							int success = 1;
 							while($3){
-								if(i==no_of_params){
+								if(i==parameterCount){
 									yyerror("Number of arguments doesnt match function");
 									success = 0;
 									break;
@@ -597,7 +597,7 @@ Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 								}else{
 									// identifer is sent
 									// first of all we need to check that the variable passed is in table
-									struct variable_entry * arg_identifier = find_variable_in_scope(current_scope,$3->my_name);
+									struct variable_entry * arg_identifier = variable_found_in_scope(current_scope,$3->my_name);
 									if(arg_identifier == NULL){
 										yyerror("variable in the argument list not initialzed in this scope");
 									}else{
@@ -611,13 +611,13 @@ Function_Calls: ORBRACKET Function_Calls CRBRACKET  {$$ = $2;}
 								$3= $3->next_arg;
 								i++;
 							}
-							if(i < no_of_params){
+							if(i < parameterCount){
 									yyerror("Number of arguments doesnt match function");
 									success = 0;
 							}
 							if(success == 1){
 								set_variable_used_in_scope(current_scope, current_identifier->variable_name);
-								set_lexemeInfo(&$$,current_identifier->my_datatype);
+								set_lexeme(&$$,current_identifier->my_datatype);
 								$$->variableName = $1;
 							}else{
 								$$ = NULL;
@@ -657,9 +657,9 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 	// make the new scope by malloc
  	current_scope = (struct scope *)malloc(sizeof(struct scope)); 
  	// calling initialize fn in scope.h
-	(*current_scope) = initialize_scope();
+	(*current_scope) = initScope();
 	// updating my parent
- 	set_parent_of_scope(current_scope,parent_scope);
+ 	setParent(current_scope,parent_scope);
  }
 
  void exit_a_scope(){
@@ -669,13 +669,13 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 	// not all cases we will have parent since at first and last scope it will be null
 	
 	if(parent_scope)
-		parent_scope = parent_scope->my_parent;
+		parent_scope = parent_scope->parent;
 	// delete_scope fn return the parent of current scope  
 	current_scope =  delete_scope(current_scope);
 	return;
  }
 
- DataTypes* get_parameters_of_array(struct argument_info* temp, int * no_of_arguments){
+ DataType* get_parameters_of_array(struct argument_info* temp, int * no_of_arguments){
 	(*no_of_arguments) = 0 ;
 	struct argument_info* start_ptr = temp;
 	while(start_ptr){
@@ -686,7 +686,7 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 	// Dynamically allocate memory using malloc()
 	if((*no_of_arguments) == 0 )
 		return NULL;
-	DataTypes* arguments_list = (DataTypes*)malloc((*no_of_arguments) * sizeof(DataTypes));
+	DataType* arguments_list = (DataType*)malloc((*no_of_arguments) * sizeof(DataType));
 	int i = 0 ;
 	while(start_ptr){
 		arguments_list[i] = start_ptr->my_type;
@@ -696,7 +696,7 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 	return arguments_list;
  }
 
- void add_parameters_to_function_symbol_table(DataTypes* arguments_list,struct argument_info* temp){
+ void add_parameters_to_function_symbol_table(DataType* arguments_list,struct argument_info* temp){
 	int i = 0 ;
 	struct argument_info* start_ptr = temp;
 	while(start_ptr){
@@ -713,7 +713,7 @@ endCondition: %prec IFX | ELSE  {enter_new_scope();} stmt {exit_a_scope();}
 
 void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,char* op){
 	// Number_Declaration will be ready and upgraded if needed
-	current_return_code = assign_previously_declared_variable_in_scope(current_scope,lhs);
+	current_return_code = assign_variable_in_scope(current_scope,lhs);
 	if(current_return_code == FAILURE){
 		yyerror_with_variable("Undeclared variable ", lhs);
 		return;
@@ -724,30 +724,30 @@ void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,cha
 		return;
 	}
 
-	current_identifier = find_variable_in_scope(current_scope,lhs);
+	current_identifier = variable_found_in_scope(current_scope,lhs);
 	if(current_identifier == NULL){
 		yyerror_with_variable("identifier not declared in this scope",lhs );
 	}else{
-		operation = implicit_conversion(current_identifier->my_datatype,(*rhs)->my_type);
-		if(operation == EVAL_THEN_DOWNGRADE_RHS){
+		operation = sides_implicit_conversion(current_identifier->my_datatype,(*rhs)->my_type);
+		if(operation == DOWNGRADE_RHS){
 			// downgrade conv to result dt needed
-			current_return_code = downgrade_my_value(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
+			current_return_code = down_convert_type(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}else{
 				//quadraples
 				push(quad_stack,lhs,NULL,quadraplesFile);push(quad_stack,op,lhs,quadraplesFile);
 			}
-		}else if(operation == EVAL_THEN_UPGRADE_RHS){
+		}else if(operation == UPGRADE_RHS){
 			// upgrade to result dt needed
-			current_return_code = upgrade_my_value(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
+			current_return_code = up_convert_my_type(rhs,(*rhs)->my_type, current_identifier->my_datatype,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}else{
 				//quadraples
 				push(quad_stack,lhs,NULL,quadraplesFile);push(quad_stack,op,lhs,quadraplesFile);
 			}
-		}else if(operation == RAISE_ERROR){
+		}else if(operation == ERROR){
 			yyerror("invalid string conversion");
 		}else{
 				//quadraples
@@ -756,28 +756,28 @@ void assigning_operation_with_conversion(char* lhs, struct lexemeInfo ** rhs,cha
 	}
 }
 
-void check_Type_Conversion(DataTypes real_identifier ,struct argument_info* input_argument){
-		operation = implicit_conversion(real_identifier,input_argument->my_type);
+void check_Type_Conversion(DataType real_identifier ,struct argument_info* input_argument){
+		operation = sides_implicit_conversion(real_identifier,input_argument->my_type);
 		struct lexemeInfo *input_lexeme ;
-		set_lexemeInfo(&input_lexeme, input_argument->my_type);
+		set_lexeme(&input_lexeme, input_argument->my_type);
 		
-		if(operation == EVAL_THEN_DOWNGRADE_RHS){
+		if(operation == DOWNGRADE_RHS){
 			// downgrade conv to result dt needed
-			current_return_code = downgrade_my_value(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
+			current_return_code = down_convert_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
 			
 			
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}
 
-		}else if(operation == EVAL_THEN_UPGRADE_RHS){
+		}else if(operation == UPGRADE_RHS){
 			// upgrade to result dt needed
 			
-			current_return_code = upgrade_my_value(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
+			current_return_code = up_convert_my_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}
-		}else if(operation == RAISE_ERROR){
+		}else if(operation == ERROR){
 			yyerror("invalid string conversion");
 		}
 }

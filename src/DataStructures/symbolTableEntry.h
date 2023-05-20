@@ -10,7 +10,7 @@ struct variableEntry
     Type type;
     DataType dataType;
 
-    DataType *parameterTypes;
+    DataType *params;
     int parameterCount;
 
     int is_initialized;
@@ -25,7 +25,7 @@ struct variableEntry *copy_variable(struct variableEntry *oldVariable)
     newVariable->name = oldVariable->name;
     newVariable->type = oldVariable->type;
     newVariable->dataType = oldVariable->dataType;
-    newVariable->parameterTypes = oldVariable->parameterTypes;
+    newVariable->params = oldVariable->params;
     newVariable->parameterCount = oldVariable->parameterCount;
     newVariable->is_initialized = oldVariable->is_initialized;
     newVariable->used = oldVariable->used;

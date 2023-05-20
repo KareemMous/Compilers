@@ -52,7 +52,7 @@ struct variableEntry *variable_found_in_scope(struct scope *scope, char *name)
     return NULL;
 }
 
-ReturnCode add_variable_to_scope(struct scope *scope, char *name, Type type, DataType dataType, DataType *parameterTypes, int parameterCount, int initialized, int used)
+ReturnCode add_variable_to_scope(struct scope *scope, char *name, int initialized, DataType dataType, Type type, DataType *parameterTypes, int parameterCount)
 {
     struct variableEntry *variable = (struct variableEntry *)malloc(sizeof(struct variableEntry));
     variable->name = name;

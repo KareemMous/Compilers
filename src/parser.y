@@ -752,7 +752,7 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 		
 		if(operation == DOWNGRADE_RHS){
 			// downgrade conv to result dt needed
-			current_return_code = down_convert_type(&input_lexeme,input_lexeme->dataType, real_identifier,yylineno);
+			current_return_code = down_convert_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
 			
 			
 			if(current_return_code == STRING_INVALID_OPERATION){
@@ -762,7 +762,7 @@ void check_Type_Conversion(DataType real_identifier ,struct argument_info* input
 		}else if(operation == UPGRADE_RHS){
 			// upgrade to result dt needed
 			
-			current_return_code = up_convert_my_type(&input_lexeme,input_lexeme->dataType, real_identifier,yylineno);
+			current_return_code = up_convert_my_type(&input_lexeme,input_lexeme->my_type, real_identifier,yylineno);
 			if(current_return_code == STRING_INVALID_OPERATION){
 				yyerror("invalid string conversion");
 			}

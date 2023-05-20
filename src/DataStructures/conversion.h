@@ -17,30 +17,30 @@ ReturnCode rhs_value(struct lexemeInfo **result, struct lexemeInfo *operand1, st
 
     if (op == UMINUS_OP && operand2 == NULL)
     {
-        if (operand1->dataType == INT_DT)
+        if (operand1->my_type == INT_DT || operand1->my_type == CONST_INT_DT)
             (*result)->intValue = -operand1->intValue;
-        else if (operand1->dataType == FLOAT_DT)
+        else if (operand1->my_type == FLOAT_DT || operand1->my_type == CONST_FLOAT_DT)
             (*result)->floatValue = -operand1->floatValue;
         else
             return OPERATION_NOT_SUPPORTED;
         return SUCCESS;
     }
 
-    DataType highestDT = highest_data_type(operand1->dataType, operand2->dataType);
+    DataType highestDT = highest_data_type(operand1->my_type, operand2->my_type);
 
-    ReturnCode code = check_sides(operand1->dataType, operand2->dataType);
+    ReturnCode code = check_sides(operand1->my_type, operand2->my_type);
     if (code == FAILURE)
     {
-        if (operand1->dataType == highestDT)
+        if (operand1->my_type == highestDT)
         {
-            DataType lowerDT = operand2->dataType;
-            operand2->dataType = highestDT;
+            DataType lowerDT = operand2->my_type;
+            operand2->my_type = highestDT;
             up_convert_my_type(&operand2, lowerDT, highestDT, yylineno);
         }
-        else if (operand2->dataType == highestDT)
+        else if (operand2->my_type == highestDT)
         {
-            DataType lowerDT = operand1->dataType;
-            operand1->dataType = highestDT;
+            DataType lowerDT = operand1->my_type;
+            operand1->my_type = highestDT;
             up_convert_my_type(&operand1, lowerDT, highestDT, yylineno);
         }
         code = SUCCESS;

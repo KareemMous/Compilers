@@ -7,7 +7,7 @@
 struct lexemeInfo
 {
     char *variableName;
-    DataType dataType;
+    DataType my_type;
     int intValue;
     float floatValue;
     char charValue;
@@ -20,7 +20,7 @@ struct lexemeInfo
 void set_lexeme(struct lexemeInfo **input_lexeme, DataType type)
 {
     (*input_lexeme) = (struct lexemeInfo *)malloc(sizeof(struct lexemeInfo));
-    (*input_lexeme)->dataType = type;
+    (*input_lexeme)->my_type = type;
     (*input_lexeme)->is_initialized = 1;
 }
 

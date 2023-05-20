@@ -20,7 +20,7 @@ typedef enum
     CONST_FLOAT_DT,
     STRING_DT,
     CONST_STRING_DT,
-    VOID
+    VOID_DT
 } DataType;
 
 typedef enum
